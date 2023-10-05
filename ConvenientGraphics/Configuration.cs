@@ -10,7 +10,7 @@ namespace ConvenientGraphics
     public class Configuration : IPluginConfiguration
     {
         public int Version { get; set; } = 0;
-        public Dictionary<GroupType, Dictionary<ConfigOption, int>> GraphicsSettings = new Dictionary<GroupType, Dictionary<ConfigOption, int>>();
+        public Dictionary<GroupType, Dictionary<string, uint>> GraphicsSettings = new Dictionary<GroupType, Dictionary<string, uint>>();
 
         // the below exist just to make saving less cumbersome
         [NonSerialized]
@@ -41,73 +41,73 @@ namespace ConvenientGraphics
         {
             GraphicsSettings.Clear();
 
-            GraphicsSettings[GroupType.Standard] = new Dictionary<ConfigOption, int>();
-            GraphicsSettings[GroupType.Standard][ConfigOption.CharaLight] = 30;
-            GraphicsSettings[GroupType.Standard][ConfigOption.Gamma] = 30;
-            GraphicsSettings[GroupType.Standard][ConfigOption.ReflectionType_DX11] = 0;
-            GraphicsSettings[GroupType.Standard][ConfigOption.ParallaxOcclusion_DX11] = 0;
-            GraphicsSettings[GroupType.Standard][ConfigOption.TextureFilterQuality_DX11] = 0;
-            GraphicsSettings[GroupType.Standard][ConfigOption.TextureAnisotropicQuality_DX11] = 0;
-            GraphicsSettings[GroupType.Standard][ConfigOption.Vignetting_DX11] = 0;
-            GraphicsSettings[GroupType.Standard][ConfigOption.SSAO_DX11] = 0;
-            GraphicsSettings[GroupType.Standard][ConfigOption.DisplayObjectLimitType] = 0;
-            GraphicsSettings[GroupType.Standard][ConfigOption.MouseOpeLimit] = 0;
-            GraphicsSettings[GroupType.Standard][ConfigOption.MoveMode] = 0;
-            GraphicsSettings[GroupType.Standard][ConfigOption.ObjectBorderingType] = 0;
-            GraphicsSettings[GroupType.Standard][(ConfigOption)ConfigOptionLocal.UseChillframes] = 1;
-            GraphicsSettings[GroupType.Standard][(ConfigOption)ConfigOptionLocal.SetHudLayout] = 0;
-            GraphicsSettings[GroupType.Standard][(ConfigOption)ConfigOptionLocal.ShowNameplates] = 3;
+            GraphicsSettings[GroupType.Standard] = new Dictionary<string, uint>();
+            GraphicsSettings[GroupType.Standard]["CharaLight"] = 30;
+            GraphicsSettings[GroupType.Standard]["Gamma"] = 30;
+            GraphicsSettings[GroupType.Standard]["ReflectionType_DX11"] = 3;
+            GraphicsSettings[GroupType.Standard]["ParallaxOcclusion_DX11"] = 1;
+            GraphicsSettings[GroupType.Standard]["TextureFilterQuality_DX11"] = 2;
+            GraphicsSettings[GroupType.Standard]["TextureAnisotropicQuality_DX11"] = 2;
+            GraphicsSettings[GroupType.Standard]["Vignetting_DX11"] = 0;
+            GraphicsSettings[GroupType.Standard]["SSAO_DX11"] = 4;
+            GraphicsSettings[GroupType.Standard]["DisplayObjectLimitType"] = 0;
+            GraphicsSettings[GroupType.Standard]["MouseOpeLimit"] = 0;
+            GraphicsSettings[GroupType.Standard]["MoveMode"] = 0;
+            GraphicsSettings[GroupType.Standard]["ObjectBorderingType"] = 0;
+            GraphicsSettings[GroupType.Standard]["NamePlateDispTypeOther"] = 2;
+            GraphicsSettings[GroupType.Standard]["_UseChillframes"] = 1;
+            GraphicsSettings[GroupType.Standard]["_SetHudLayout"] = 0;
 
-            GraphicsSettings[GroupType.InDuty] = new Dictionary<ConfigOption, int>();
-            GraphicsSettings[GroupType.InDuty][ConfigOption.CharaLight] = 20;
-            GraphicsSettings[GroupType.InDuty][ConfigOption.Gamma] = 0;
-            GraphicsSettings[GroupType.InDuty][ConfigOption.ReflectionType_DX11] = 3;
-            GraphicsSettings[GroupType.InDuty][ConfigOption.ParallaxOcclusion_DX11] = 1;
-            GraphicsSettings[GroupType.InDuty][ConfigOption.TextureFilterQuality_DX11] = 0;
-            GraphicsSettings[GroupType.InDuty][ConfigOption.TextureAnisotropicQuality_DX11] = 2;
-            GraphicsSettings[GroupType.InDuty][ConfigOption.Vignetting_DX11] = 0;
-            GraphicsSettings[GroupType.InDuty][ConfigOption.SSAO_DX11] = 4;
-            GraphicsSettings[GroupType.InDuty][ConfigOption.DisplayObjectLimitType] = 0;
-            GraphicsSettings[GroupType.InDuty][ConfigOption.MouseOpeLimit] = 0;
-            GraphicsSettings[GroupType.InDuty][ConfigOption.MoveMode] = 0;
-            GraphicsSettings[GroupType.InDuty][ConfigOption.ObjectBorderingType] = 0;
-            GraphicsSettings[GroupType.InDuty][(ConfigOption)ConfigOptionLocal.UseChillframes] = 1;
-            GraphicsSettings[GroupType.InDuty][(ConfigOption)ConfigOptionLocal.SetHudLayout] = 0;
-            GraphicsSettings[GroupType.InDuty][(ConfigOption)ConfigOptionLocal.ShowNameplates] = 3;
+            GraphicsSettings[GroupType.InDuty] = new Dictionary<string, uint>();
+            GraphicsSettings[GroupType.InDuty]["CharaLight"] = 20;
+            GraphicsSettings[GroupType.InDuty]["Gamma"] = 0;
+            GraphicsSettings[GroupType.InDuty]["ReflectionType_DX11"] = 0;
+            GraphicsSettings[GroupType.InDuty]["ParallaxOcclusion_DX11"] = 0;
+            GraphicsSettings[GroupType.InDuty]["TextureFilterQuality_DX11"] = 2;
+            GraphicsSettings[GroupType.InDuty]["TextureAnisotropicQuality_DX11"] = 0;
+            GraphicsSettings[GroupType.InDuty]["Vignetting_DX11"] = 0;
+            GraphicsSettings[GroupType.InDuty]["SSAO_DX11"] = 0;
+            GraphicsSettings[GroupType.InDuty]["DisplayObjectLimitType"] = 4;
+            GraphicsSettings[GroupType.InDuty]["MouseOpeLimit"] = 0;
+            GraphicsSettings[GroupType.InDuty]["MoveMode"] = 0;
+            GraphicsSettings[GroupType.InDuty]["ObjectBorderingType"] = 0;
+            GraphicsSettings[GroupType.InDuty]["NamePlateDispTypeOther"] = 2;
+            GraphicsSettings[GroupType.InDuty]["_UseChillframes"] = 1;
+            GraphicsSettings[GroupType.InDuty]["_SetHudLayout"] = 0;
 
-            GraphicsSettings[GroupType.VR] = new Dictionary<ConfigOption, int>();
-            GraphicsSettings[GroupType.VR][ConfigOption.CharaLight] = 20;
-            GraphicsSettings[GroupType.VR][ConfigOption.Gamma] = 0;
-            GraphicsSettings[GroupType.VR][ConfigOption.ReflectionType_DX11] = 3;
-            GraphicsSettings[GroupType.VR][ConfigOption.ParallaxOcclusion_DX11] = 1;
-            GraphicsSettings[GroupType.VR][ConfigOption.TextureFilterQuality_DX11] = 0;
-            GraphicsSettings[GroupType.VR][ConfigOption.TextureAnisotropicQuality_DX11] = 2;
-            GraphicsSettings[GroupType.VR][ConfigOption.Vignetting_DX11] = 0;
-            GraphicsSettings[GroupType.VR][ConfigOption.SSAO_DX11] = 4;
-            GraphicsSettings[GroupType.VR][ConfigOption.DisplayObjectLimitType] = 2;
-            GraphicsSettings[GroupType.VR][ConfigOption.MouseOpeLimit] = 1;
-            GraphicsSettings[GroupType.VR][ConfigOption.MoveMode] = 1;
-            GraphicsSettings[GroupType.VR][ConfigOption.ObjectBorderingType] = 1;
-            GraphicsSettings[GroupType.VR][(ConfigOption)ConfigOptionLocal.UseChillframes] = 0;
-            GraphicsSettings[GroupType.VR][(ConfigOption)ConfigOptionLocal.SetHudLayout] = 0;
-            GraphicsSettings[GroupType.VR][(ConfigOption)ConfigOptionLocal.ShowNameplates] = 3;
+            GraphicsSettings[GroupType.VR] = new Dictionary<string, uint>();
+            GraphicsSettings[GroupType.VR]["CharaLight"] = 20;
+            GraphicsSettings[GroupType.VR]["Gamma"] = 0;
+            GraphicsSettings[GroupType.VR]["ReflectionType_DX11"] = 0;
+            GraphicsSettings[GroupType.VR]["ParallaxOcclusion_DX11"] = 0;
+            GraphicsSettings[GroupType.VR]["TextureFilterQuality_DX11"] = 2;
+            GraphicsSettings[GroupType.VR]["TextureAnisotropicQuality_DX11"] = 0;
+            GraphicsSettings[GroupType.VR]["Vignetting_DX11"] = 0;
+            GraphicsSettings[GroupType.VR]["SSAO_DX11"] = 0;
+            GraphicsSettings[GroupType.VR]["DisplayObjectLimitType"] = 3;
+            GraphicsSettings[GroupType.VR]["MouseOpeLimit"] = 1;
+            GraphicsSettings[GroupType.VR]["MoveMode"] = 1;
+            GraphicsSettings[GroupType.VR]["ObjectBorderingType"] = 1;
+            GraphicsSettings[GroupType.VR]["NamePlateDispTypeOther"] = 2;
+            GraphicsSettings[GroupType.VR]["_UseChillframes"] = 0;
+            GraphicsSettings[GroupType.VR]["_SetHudLayout"] = 0;
 
-            GraphicsSettings[GroupType.VRInCapital] = new Dictionary<ConfigOption, int>();
-            GraphicsSettings[GroupType.VRInCapital][ConfigOption.CharaLight] = 20;
-            GraphicsSettings[GroupType.VRInCapital][ConfigOption.Gamma] = 0;
-            GraphicsSettings[GroupType.VRInCapital][ConfigOption.ReflectionType_DX11] = 3;
-            GraphicsSettings[GroupType.VRInCapital][ConfigOption.ParallaxOcclusion_DX11] = 1;
-            GraphicsSettings[GroupType.VRInCapital][ConfigOption.TextureFilterQuality_DX11] = 0;
-            GraphicsSettings[GroupType.VRInCapital][ConfigOption.TextureAnisotropicQuality_DX11] = 2;
-            GraphicsSettings[GroupType.VRInCapital][ConfigOption.Vignetting_DX11] = 0;
-            GraphicsSettings[GroupType.VRInCapital][ConfigOption.SSAO_DX11] = 4;
-            GraphicsSettings[GroupType.VRInCapital][ConfigOption.DisplayObjectLimitType] = 3;
-            GraphicsSettings[GroupType.VRInCapital][ConfigOption.MouseOpeLimit] = 1;
-            GraphicsSettings[GroupType.VRInCapital][ConfigOption.MoveMode] = 1;
-            GraphicsSettings[GroupType.VRInCapital][ConfigOption.ObjectBorderingType] = 1;
-            GraphicsSettings[GroupType.VRInCapital][(ConfigOption)ConfigOptionLocal.UseChillframes] = 0;
-            GraphicsSettings[GroupType.VRInCapital][(ConfigOption)ConfigOptionLocal.SetHudLayout] = 0;
-            GraphicsSettings[GroupType.VRInCapital][(ConfigOption)ConfigOptionLocal.ShowNameplates] = 3;
+            GraphicsSettings[GroupType.VRInCapital] = new Dictionary<string, uint>();
+            GraphicsSettings[GroupType.VRInCapital]["CharaLight"] = 20;
+            GraphicsSettings[GroupType.VRInCapital]["Gamma"] = 0;
+            GraphicsSettings[GroupType.VRInCapital]["ReflectionType_DX11"] = 0;
+            GraphicsSettings[GroupType.VRInCapital]["ParallaxOcclusion_DX11"] = 0;
+            GraphicsSettings[GroupType.VRInCapital]["TextureFilterQuality_DX11"] = 2;
+            GraphicsSettings[GroupType.VRInCapital]["TextureAnisotropicQuality_DX11"] = 0;
+            GraphicsSettings[GroupType.VRInCapital]["Vignetting_DX11"] = 0;
+            GraphicsSettings[GroupType.VRInCapital]["SSAO_DX11"] = 0;
+            GraphicsSettings[GroupType.VRInCapital]["DisplayObjectLimitType"] = 2;
+            GraphicsSettings[GroupType.VRInCapital]["MouseOpeLimit"] = 1;
+            GraphicsSettings[GroupType.VRInCapital]["MoveMode"] = 1;
+            GraphicsSettings[GroupType.VRInCapital]["ObjectBorderingType"] = 1;
+            GraphicsSettings[GroupType.VRInCapital]["NamePlateDispTypeOther"] = 2;
+            GraphicsSettings[GroupType.VRInCapital]["_UseChillframes"] = 0;
+            GraphicsSettings[GroupType.VRInCapital]["_SetHudLayout"] = 0;
         }
     }
 }

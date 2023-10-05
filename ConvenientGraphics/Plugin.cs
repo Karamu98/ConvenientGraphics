@@ -1,15 +1,13 @@
-using Dalamud.Game;
 using Dalamud.Game.Command;
-using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Game.Gui;
 using Dalamud.IoC;
 using Dalamud.Plugin;
-using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using Dalamud.Interface.Windowing;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
+using Dalamud.Memory;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using FFXIVClientStructs.FFXIV.Common.Configuration;
 
 using System;
 using System.Collections.Generic;
@@ -18,20 +16,19 @@ using XivCommon;
 using ConvenientGraphics.Windows;
 using MemoryManager.Structures;
 
-
 namespace ConvenientGraphics
 {
-    public unsafe class ConvenientGraphics : IDalamudPlugin
+    public unsafe class Plugin : IDalamudPlugin
     {
-        [PluginService] public static DalamudPluginInterface? PluginInterface { get; private set; }
-        [PluginService] public static Framework? Framework { get; private set; }
-        [PluginService] public static CommandManager? CommandManager { get; private set; }
-        [PluginService] public static ClientState? ClientState { get; private set; }
-        [PluginService] public static ChatGui? ChatGui { get; private set; }
-        [PluginService] public static Condition? Condition { get; private set; }
-        [PluginService] public static GameGui? GameGui { get; private set; }
+        [PluginService] public static DalamudPluginInterface? PluginInterface { get; private set; } = null;
+        [PluginService] public static IFramework? iFramework { get; private set; } = null;
+        [PluginService] public static ICommandManager? CommandManager { get; private set; } = null;
+        [PluginService] public static IClientState? ClientState { get; private set; } = null;
+        [PluginService] public static IChatGui? ChatGui { get; private set; } = null;
+        [PluginService] public static ICondition? Condition { get; private set; } = null;
+        [PluginService] public static IGameGui? GameGui { get; private set; } = null;
+        [PluginService] public static IPluginLog? Log { get; private set; } = null;
 
-        public ConvenientGraphics Plugin { get; init; }
         public static SharedMemoryManager smm = new SharedMemoryManager();
         public string Name => "ConvenientGraphics";
         private const string CommandName = "/congraph";
@@ -39,7 +36,11 @@ namespace ConvenientGraphics
         public Configuration cfg { get; init; }
         public WindowSystem WindowSystem = new("ConvenientGraphics");
         private MainWindow MainWindow { get; init; }
-        private XivCommonBase chatHandler = new();
+        private XivCommonBase chatHandler { get; set; }
+        private Framework* frameworkInstance = Framework.Instance();
+
+        ConfigBase*[] cfgBase = new ConfigBase*[4];
+        private Dictionary<string, List<Tuple<uint, uint>>> MappedSettings = new Dictionary<string, List<Tuple<uint, uint>>>();
 
         private List<ushort> cityZones = new List<ushort>() { 
             128, 129, // limsa
@@ -61,23 +62,24 @@ namespace ConvenientGraphics
         private bool isEnabled = false;
         private bool isXIVRActive = false;
         private bool isXIVRCapital = false;
-        private int UpdateValue = 3;
+        private int cfgVersionValue = 5;
         private bool isVertMovement = false;
         private int timeOutCount = 0;
         private GroupType prevGroup = GroupType.Standard;
         private GroupType currentGroup = GroupType.Standard;
         bool isInDuty = false;
 
-        public ConvenientGraphics()
+        public Plugin()
         {
-            Plugin = this;
             cfg = PluginInterface!.GetPluginConfig() as Configuration ?? new Configuration();
             cfg.Initialize(PluginInterface!);
-            cfg.CheckVersion(UpdateValue);
+            cfg.CheckVersion(cfgVersionValue);
 
+            chatHandler = new XivCommonBase(PluginInterface);
             MainWindow = new MainWindow(this);
             WindowSystem.AddWindow(MainWindow);
 
+            CommandManager!.RemoveHandler(CommandName);
             CommandManager!.AddHandler(CommandName, new CommandInfo(OnCommand)
             {
                 HelpMessage = "Help stuff here"
@@ -85,7 +87,7 @@ namespace ConvenientGraphics
 
             ClientState!.Login += OnLogin;
             ClientState!.Logout += OnLogout;
-            Framework!.Update += Update;
+            iFramework!.Update += Update;
             PluginInterface!.UiBuilder.Draw += DrawUI;
             PluginInterface!.UiBuilder.OpenConfigUi += ToggleUI;
 
@@ -104,7 +106,7 @@ namespace ConvenientGraphics
 
             ClientState!.Login -= OnLogin;
             ClientState!.Logout -= OnLogout;
-            Framework!.Update -= Update;
+            iFramework!.Update -= Update;
             PluginInterface!.UiBuilder.Draw -= DrawUI;
             PluginInterface!.UiBuilder.OpenConfigUi -= ToggleUI;
 
@@ -126,16 +128,16 @@ namespace ConvenientGraphics
             this.WindowSystem.Draw();
         }
 
-        private void OnLogin(object? sender, EventArgs e)
+        private void OnLogin()
         {
             Start();
         }
-        private void OnLogout(object? sender, EventArgs e)
+        private void OnLogout()
         {
 
         }
 
-        private void Update(Framework framework)
+        private void Update(IFramework framework)
         {
             //----
             // If vr is active, load vr settings
@@ -162,8 +164,8 @@ namespace ConvenientGraphics
                         prevGroup = GroupType.Standard;
                         isXIVRCapital = false;
                     }
-                    SetSettings(currentGroup, cfg.GraphicsSettings[currentGroup]);
                     isXIVRActive = xivrActive;
+                    SetSettings(currentGroup, cfg.GraphicsSettings[currentGroup]);
                 }
             }
             if (!isXIVRActive)
@@ -176,8 +178,8 @@ namespace ConvenientGraphics
                         currentGroup = GroupType.InDuty;
                     else
                         currentGroup = GroupType.Standard;
-                    SetSettings(currentGroup, cfg.GraphicsSettings[currentGroup]);
                     isInDuty = inDuty;
+                    SetSettings(currentGroup, cfg.GraphicsSettings[currentGroup]);
                 }
             }
             else
@@ -189,17 +191,17 @@ namespace ConvenientGraphics
                         currentGroup = GroupType.VRInCapital;
                     else
                         currentGroup = GroupType.VR;
-                    SetSettings(currentGroup, cfg.GraphicsSettings[currentGroup]);
                     isXIVRCapital = xivrCapital;
+                    SetSettings(currentGroup, cfg.GraphicsSettings[currentGroup]);
                 }
 
                 bool vertMovment = Condition![ConditionFlag.InFlight] || Condition![ConditionFlag.Diving];
                 if (isVertMovement != vertMovment)
                 {
                     if (vertMovment)
-                        ConfigModule.Instance()->SetOption(ConfigOption.MoveMode, 0);
+                        SetSettingsValue(MappedSettings["MoveMode"], 0);
                     else
-                        ConfigModule.Instance()->SetOption(ConfigOption.MoveMode, cfg.GraphicsSettings[GroupType.VR][ConfigOption.MoveMode]);
+                        SetSettingsValue(MappedSettings["MoveMode"], cfg.GraphicsSettings[GroupType.VR]["MoveMode"]);
                     isVertMovement = vertMovment;
                 }
             }
@@ -212,38 +214,98 @@ namespace ConvenientGraphics
         {
             smm.SetOpen(SharedMemoryPlugins.ConvenientGraphics);
             currentGroup = GroupType.Standard;
+
+            cfgBase[0] = &(frameworkInstance->SystemConfig.CommonSystemConfig.ConfigBase);
+            cfgBase[1] = &(frameworkInstance->SystemConfig.CommonSystemConfig.UiConfig);
+            cfgBase[2] = &(frameworkInstance->SystemConfig.CommonSystemConfig.UiControlConfig);
+            cfgBase[3] = &(frameworkInstance->SystemConfig.CommonSystemConfig.UiControlGamepadConfig);
+
+            List<string> cfgSearchStrings = new List<string>() {
+                "CharaLight",
+                "Gamma",
+                "ReflectionType_DX11",
+                "ParallaxOcclusion_DX11",
+                "TextureFilterQuality_DX11",
+                "TextureAnisotropicQuality_DX11",
+                "Vignetting_DX11",
+                "SSAO_DX11",
+                "DisplayObjectLimitType",
+                "MouseOpeLimit",
+                "MoveMode",
+                "ObjectBorderingType",
+                "NamePlateDispTypeOther"
+                };
+
+            MappedSettings.Clear();
+            for (uint cfgId = 0; cfgId < cfgBase.Length; cfgId++)
+            {
+                for (uint i = 0; i < cfgBase[cfgId]->ConfigCount; i++)
+                {
+                    if (cfgBase[cfgId]->ConfigEntry[i].Type == 0)
+                        continue;
+
+                    string name = MemoryHelper.ReadStringNullTerminated(new IntPtr(cfgBase[cfgId]->ConfigEntry[i].Name));
+                    if(cfgSearchStrings.Contains(name))
+                    {
+                        if (!MappedSettings.ContainsKey(name))
+                            MappedSettings[name] = new List<Tuple<uint, uint>>();
+                        MappedSettings[name].Add(new Tuple<uint, uint>(cfgId, cfgBase[cfgId]->ConfigEntry[i].Index));
+                    }
+                }
+            }
         }
 
         public void Start()
         {
             isEnabled = true;
             smm.SetActive(SharedMemoryPlugins.ConvenientGraphics);
-            PrintEcho("Graphics Changing Enabled");
+            //PrintEcho("Graphics Changing Enabled");
             timeOutCount = 0;
             SetSettings(currentGroup, cfg.GraphicsSettings[currentGroup]);
         }
 
         public void Stop()
         {
-            PrintEcho("Graphics Changing Disabled");
+            //PrintEcho("Graphics Changing Disabled");
             smm.SetInactive(SharedMemoryPlugins.ConvenientGraphics);
             isEnabled = false;
         }
 
-        private void SetSettings(GroupType currentGroup, Dictionary<ConfigOption, int> settingOptions)
+        public void Reset()
+        {
+            timeOutCount = 0;
+            SetSettings(currentGroup, cfg.GraphicsSettings[currentGroup]);
+        }
+
+
+        private void SetSettingsValue(List<Tuple<uint, uint>> list, uint value)
+        {
+            foreach (Tuple<uint, uint> item in list)
+                cfgBase[item.Item1]->ConfigEntry[item.Item2].SetValueUInt(value);
+        }
+
+        private uint GetSettingsValue(List<Tuple<uint, uint>> list, int index)
+        {
+            if (index >= list.Count)
+                return 0;
+            return cfgBase[list[index].Item1]->ConfigEntry[list[index].Item2].Value.UInt;
+        }
+
+        private void SetSettings(GroupType currentGroup, Dictionary<string, uint> settingOptions)
         {
             PrintEcho($"Setting {currentGroup}");
-            foreach (KeyValuePair<ConfigOption, int> option in settingOptions)
+            foreach (KeyValuePair<string, uint> option in settingOptions)
             {
-                if((int)option.Key < (int)ConfigOptionLocal.UseChillframes)
-                    ConfigModule.Instance()->SetOption(option.Key, option.Value);
+                if(!option.Key.StartsWith("_"))
+                    if(MappedSettings.ContainsKey(option.Key))
+                        SetSettingsValue(MappedSettings[option.Key], option.Value);
             }
 
             //----
             // Set FPS
             //----
-            if(settingOptions.ContainsKey((ConfigOption)ConfigOptionLocal.UseChillframes))
-                if(settingOptions[(ConfigOption)ConfigOptionLocal.UseChillframes] == 0)
+            if(settingOptions.ContainsKey("_UseChillframes"))
+                if(settingOptions["_UseChillframes"] == 0)
                     CommandManager!.ProcessCommand($"/chillframes disable");
                 else
                     CommandManager!.ProcessCommand($"/chillframes enable");
@@ -251,13 +313,13 @@ namespace ConvenientGraphics
             //----
             // Set HUD
             //----
-            if (settingOptions.ContainsKey((ConfigOption)ConfigOptionLocal.SetHudLayout))
+            if (settingOptions.ContainsKey("_SetHudLayout"))
             {
                 //----
                 // Create a timer to check for the existance of the player
                 // and only update the hud if one exists
                 //----
-                int hudLayout = settingOptions[(ConfigOption)ConfigOptionLocal.SetHudLayout];
+                uint hudLayout = settingOptions["_SetHudLayout"];
                 if (hudLayout > 0)
                 {
                     System.Timers.Timer hudChangeTimer = new System.Timers.Timer();
@@ -269,7 +331,7 @@ namespace ConvenientGraphics
             }
         }
 
-        public void RefreshHUDLayoutTick(System.Timers.Timer timer, int hudLayout)
+        public void RefreshHUDLayoutTick(System.Timers.Timer timer, uint hudLayout)
         {
             AtkUnitBase* hpBar = (AtkUnitBase*)GameGui!.GetAddonByName("_ParameterWidget", 1);
             AtkUnitBase* minimap = (AtkUnitBase*)GameGui!.GetAddonByName("_NaviMap", 1);
