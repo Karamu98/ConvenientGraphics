@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Numerics;
 using Dalamud.Interface.Windowing;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using ImGuiNET;
 
 namespace ConvenientGraphics.Windows;
@@ -60,20 +59,27 @@ public class MainWindow : Window, IDisposable
     {
         if (self.cfg.GraphicsSettings.ContainsKey(curGroup))
         {
-            int CharaLight = (int)self.cfg.GraphicsSettings[curGroup]["CharaLight"];
+            bool MouseOpeLimit = Convert.ToBoolean(self.cfg.GraphicsSettings[curGroup]["MouseOpeLimit"]);
             int Gamma = (int)self.cfg.GraphicsSettings[curGroup]["Gamma"];
-            uint ReflectionType_DX11 = self.cfg.GraphicsSettings[curGroup]["ReflectionType_DX11"];
-            uint ParallaxOcclusion_DX11 = self.cfg.GraphicsSettings[curGroup]["ParallaxOcclusion_DX11"];
+            int CharaLight = (int)self.cfg.GraphicsSettings[curGroup]["CharaLight"];
+            uint DisplayObjectLimitType = self.cfg.GraphicsSettings[curGroup]["DisplayObjectLimitType"];
             uint TextureFilterQuality_DX11 = self.cfg.GraphicsSettings[curGroup]["TextureFilterQuality_DX11"];
             uint TextureAnisotropicQuality_DX11 = self.cfg.GraphicsSettings[curGroup]["TextureAnisotropicQuality_DX11"];
-            bool Vignetting_DX11 = Convert.ToBoolean(self.cfg.GraphicsSettings[curGroup]["Vignetting_DX11"]);
             uint SSAO_DX11 = self.cfg.GraphicsSettings[curGroup]["SSAO_DX11"];
-            uint DisplayObjectLimitType = self.cfg.GraphicsSettings[curGroup]["DisplayObjectLimitType"];
-            bool MouseOpeLimit = Convert.ToBoolean(self.cfg.GraphicsSettings[curGroup]["MouseOpeLimit"]);
-            uint MoveMode = self.cfg.GraphicsSettings[curGroup]["MoveMode"];
-            bool ObjectBorderingType = Convert.ToBoolean(self.cfg.GraphicsSettings[curGroup]["ObjectBorderingType"]);
+            bool Vignetting_DX11 = Convert.ToBoolean(self.cfg.GraphicsSettings[curGroup]["Vignetting_DX11"]);
+            uint ShadowVisibilityTypeOther_DX11 = self.cfg.GraphicsSettings[curGroup]["ShadowVisibilityTypeOther_DX11"];
+            uint ShadowVisibilityTypeEnemy_DX11 = self.cfg.GraphicsSettings[curGroup]["ShadowVisibilityTypeEnemy_DX11"];
+            uint PhysicsTypeOther_DX11 = self.cfg.GraphicsSettings[curGroup]["PhysicsTypeOther_DX11"];
+            uint PhysicsTypeEnemy_DX11 = self.cfg.GraphicsSettings[curGroup]["PhysicsTypeEnemy_DX11"];
+            uint ReflectionType_DX11 = self.cfg.GraphicsSettings[curGroup]["ReflectionType_DX11"];
+            uint ParallaxOcclusion_DX11 = self.cfg.GraphicsSettings[curGroup]["ParallaxOcclusion_DX11"];
+            uint BattleEffectParty = self.cfg.GraphicsSettings[curGroup]["BattleEffectParty"];
+            uint BattleEffectOther = self.cfg.GraphicsSettings[curGroup]["BattleEffectOther"];
+            bool EventCameraAutoControl = Convert.ToBoolean(self.cfg.GraphicsSettings[curGroup]["EventCameraAutoControl"]);
             uint ShowNameplates = self.cfg.GraphicsSettings[curGroup]["NamePlateDispTypeOther"];
-
+            bool AutoFaceTargetOnAction = Convert.ToBoolean(self.cfg.GraphicsSettings[curGroup]["AutoFaceTargetOnAction"]);
+            bool ObjectBorderingType = Convert.ToBoolean(self.cfg.GraphicsSettings[curGroup]["ObjectBorderingType"]);
+            uint MoveMode = self.cfg.GraphicsSettings[curGroup]["MoveMode"];
             bool UseChillframes = Convert.ToBoolean(self.cfg.GraphicsSettings[curGroup]["_UseChillframes"]);
             uint HUDLayout = self.cfg.GraphicsSettings[curGroup]["_SetHudLayout"];
 
@@ -87,6 +93,9 @@ public class MainWindow : Window, IDisposable
             string[] optionsMoveMode = { "Standard", "Legacy" };
             string[] optionsShowNameplates = { "Always", "During Battle", "When Targeted", "Never", "Out of Battle" };
             string[] optionsHUDLayout = { "Keep Current Layout", "Layout 1", "Layout 2", "Layout 3", "Layout 4" };
+            string[] optionsBattleEffect = { "Show All", "Show Limited", "Show None" };
+            string[] optionsShadowVisibilityType = { "Hide", "Display" };
+            string[] optionsPhysicsType = { "Off", "Simple", "Full" };
 
             int optionWidth = 200;
 
@@ -116,6 +125,60 @@ public class MainWindow : Window, IDisposable
                 ImGui.EndCombo();
                 self.cfg.GraphicsSettings[curGroup]["NamePlateDispTypeOther"] = ShowNameplates;
             }
+
+
+            ImGui.Text("Shadows Other NPCs"); ImGui.SameLine(); ImGui.SetNextItemWidth(optionWidth);
+            if (ImGui.BeginCombo("##ShadowVisibilityTypeOther_DX11" + curGroup, optionsShadowVisibilityType[ShadowVisibilityTypeOther_DX11]))
+            {
+                setCombo(optionsShadowVisibilityType, true, ref ShadowVisibilityTypeOther_DX11);
+                ImGui.EndCombo();
+                self.cfg.GraphicsSettings[curGroup]["ShadowVisibilityTypeOther_DX11"] = ShadowVisibilityTypeOther_DX11;
+            }
+
+            ImGui.Text("Shadows Enemy"); ImGui.SameLine(); ImGui.SetNextItemWidth(optionWidth);
+            if (ImGui.BeginCombo("##ShadowVisibilityTypeEnemy_DX11" + curGroup, optionsShadowVisibilityType[ShadowVisibilityTypeEnemy_DX11]))
+            {
+                setCombo(optionsShadowVisibilityType, true, ref ShadowVisibilityTypeEnemy_DX11);
+                ImGui.EndCombo();
+                self.cfg.GraphicsSettings[curGroup]["ShadowVisibilityTypeEnemy_DX11"] = ShadowVisibilityTypeEnemy_DX11;
+            }
+
+            ImGui.Text("Movement Physics Other"); ImGui.SameLine(); ImGui.SetNextItemWidth(optionWidth);
+            if (ImGui.BeginCombo("##PhysicsTypeOther_DX11" + curGroup, optionsPhysicsType[PhysicsTypeOther_DX11]))
+            {
+                setCombo(optionsPhysicsType, true, ref PhysicsTypeOther_DX11);
+                ImGui.EndCombo();
+                self.cfg.GraphicsSettings[curGroup]["PhysicsTypeOther_DX11"] = PhysicsTypeOther_DX11;
+            }
+
+            ImGui.Text("Movement Physics Enemy"); ImGui.SameLine(); ImGui.SetNextItemWidth(optionWidth);
+            if (ImGui.BeginCombo("##PhysicsTypeEnemy_DX11" + curGroup, optionsPhysicsType[PhysicsTypeEnemy_DX11]))
+            {
+                setCombo(optionsPhysicsType, true, ref PhysicsTypeEnemy_DX11);
+                ImGui.EndCombo();
+                self.cfg.GraphicsSettings[curGroup]["PhysicsTypeEnemy_DX11"] = PhysicsTypeEnemy_DX11;
+            }
+
+            ImGui.Text("Battle Effects Party"); ImGui.SameLine(); ImGui.SetNextItemWidth(optionWidth);
+            if (ImGui.BeginCombo("##BattleEffectParty" + curGroup, optionsBattleEffect[BattleEffectParty]))
+            {
+                setCombo(optionsBattleEffect, false, ref BattleEffectParty);
+                ImGui.EndCombo();
+                self.cfg.GraphicsSettings[curGroup]["BattleEffectParty"] = BattleEffectParty;
+            }
+
+            ImGui.Text("Battle Effects Other (excl. PvP)"); ImGui.SameLine(); ImGui.SetNextItemWidth(optionWidth);
+            if (ImGui.BeginCombo("##BattleEffectOther" + curGroup, optionsBattleEffect[BattleEffectOther]))
+            {
+                setCombo(optionsBattleEffect, false, ref BattleEffectOther);
+                ImGui.EndCombo();
+                self.cfg.GraphicsSettings[curGroup]["BattleEffectOther"] = BattleEffectOther;
+            }
+
+            ImGui.Text("Look at target when speaking"); ImGui.SameLine(); ImGui.SetNextItemWidth(optionWidth);
+            if (ImGui.Checkbox("##EventCameraAutoControl", ref EventCameraAutoControl))
+                self.cfg.GraphicsSettings[curGroup]["EventCameraAutoControl"] = Convert.ToUInt32(EventCameraAutoControl);
+
 
             ImGui.Text("Highlight Targets"); ImGui.SameLine(); ImGui.SetNextItemWidth(optionWidth);
             if (ImGui.Checkbox("##ObjectBorderingType", ref ObjectBorderingType))

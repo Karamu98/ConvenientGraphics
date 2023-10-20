@@ -3,7 +3,7 @@ using System;
 using System.IO.MemoryMappedFiles;
 using System.Threading;
 
-namespace MemoryManager.Structures
+namespace MemoryManager
 {
     public enum SharedMemoryPlugins : ushort
     {

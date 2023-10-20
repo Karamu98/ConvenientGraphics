@@ -4,17 +4,17 @@ using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Interface.Windowing;
-using Dalamud.Memory;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using FFXIVClientStructs.FFXIV.Common.Configuration;
 
 using System;
 using System.Collections.Generic;
 using XivCommon;
 
 using ConvenientGraphics.Windows;
-using MemoryManager.Structures;
+using MemoryManager;
+using SettingsManager;
+using System.Text.RegularExpressions;
 
 namespace ConvenientGraphics
 {
@@ -29,18 +29,18 @@ namespace ConvenientGraphics
         [PluginService] public static IGameGui? GameGui { get; private set; } = null;
         [PluginService] public static IPluginLog? Log { get; private set; } = null;
 
-        public static SharedMemoryManager smm = new SharedMemoryManager();
+        
         public string Name => "ConvenientGraphics";
         private const string CommandName = "/congraph";
+
+        public static SharedMemoryManager smm = new SharedMemoryManager();
+        public static ConfigManager cfgManager = new ConfigManager();
 
         public Configuration cfg { get; init; }
         public WindowSystem WindowSystem = new("ConvenientGraphics");
         private MainWindow MainWindow { get; init; }
         private XivCommonBase chatHandler { get; set; }
         private Framework* frameworkInstance = Framework.Instance();
-
-        ConfigBase*[] cfgBase = new ConfigBase*[4];
-        private Dictionary<string, List<Tuple<uint, uint>>> MappedSettings = new Dictionary<string, List<Tuple<uint, uint>>>();
 
         private List<ushort> cityZones = new List<ushort>() { 
             128, 129, // limsa
@@ -62,7 +62,7 @@ namespace ConvenientGraphics
         private bool isEnabled = false;
         private bool isXIVRActive = false;
         private bool isXIVRCapital = false;
-        private int cfgVersionValue = 5;
+        private int cfgVersionValue = 6;
         private bool isVertMovement = false;
         private int timeOutCount = 0;
         private GroupType prevGroup = GroupType.Standard;
@@ -97,12 +97,7 @@ namespace ConvenientGraphics
 
         public void Dispose()
         {
-            this.WindowSystem.RemoveAllWindows();
-            MainWindow.Dispose();
-
             Stop();
-            smm.SetClose(SharedMemoryPlugins.ConvenientGraphics);
-            smm.Dispose();
 
             ClientState!.Login -= OnLogin;
             ClientState!.Logout -= OnLogout;
@@ -111,6 +106,13 @@ namespace ConvenientGraphics
             PluginInterface!.UiBuilder.OpenConfigUi -= ToggleUI;
 
             CommandManager!.RemoveHandler(CommandName);
+
+            smm.SetClose(SharedMemoryPlugins.ConvenientGraphics);
+            smm.Dispose();
+            cfgManager.Dispose();
+
+            WindowSystem.RemoveAllWindows();
+            MainWindow.Dispose();
         }
 
         public void ToggleUI() => MainWindow.IsOpen ^= true;
@@ -121,12 +123,26 @@ namespace ConvenientGraphics
                 ToggleUI();
                 return;
             }
+
+            var regex = Regex.Match(argument, "^(\\w+) ?(.*)");
+            var subcommand = regex.Success && regex.Groups.Count > 1 ? regex.Groups[1].Value : string.Empty;
+
+            switch (subcommand.ToLower())
+            {
+                case "save":
+                    {
+                        cfgManager.Save();
+                        break;
+                    }
+                case "compare":
+                    {
+                        cfgManager.Save(true);
+                        break;
+                    }
+            }
         }
 
-        private void DrawUI()
-        {
-            this.WindowSystem.Draw();
-        }
+        private void DrawUI() => WindowSystem.Draw();
 
         private void OnLogin()
         {
@@ -199,9 +215,9 @@ namespace ConvenientGraphics
                 if (isVertMovement != vertMovment)
                 {
                     if (vertMovment)
-                        SetSettingsValue(MappedSettings["MoveMode"], 0);
+                        cfgManager.SetSettingsValue("MoveMode", 0);
                     else
-                        SetSettingsValue(MappedSettings["MoveMode"], cfg.GraphicsSettings[GroupType.VR]["MoveMode"]);
+                        cfgManager.SetSettingsValue("MoveMode", cfg.GraphicsSettings[GroupType.VR]["MoveMode"]);
                     isVertMovement = vertMovment;
                 }
             }
@@ -214,45 +230,41 @@ namespace ConvenientGraphics
         {
             smm.SetOpen(SharedMemoryPlugins.ConvenientGraphics);
             currentGroup = GroupType.Standard;
-
-            cfgBase[0] = &(frameworkInstance->SystemConfig.CommonSystemConfig.ConfigBase);
-            cfgBase[1] = &(frameworkInstance->SystemConfig.CommonSystemConfig.UiConfig);
-            cfgBase[2] = &(frameworkInstance->SystemConfig.CommonSystemConfig.UiControlConfig);
-            cfgBase[3] = &(frameworkInstance->SystemConfig.CommonSystemConfig.UiControlGamepadConfig);
-
+            
             List<string> cfgSearchStrings = new List<string>() {
-                "CharaLight",
+                "MouseOpeLimit",
                 "Gamma",
-                "ReflectionType_DX11",
-                "ParallaxOcclusion_DX11",
+                "CharaLight",
+                "DisplayObjectLimitType",
                 "TextureFilterQuality_DX11",
                 "TextureAnisotropicQuality_DX11",
-                "Vignetting_DX11",
                 "SSAO_DX11",
-                "DisplayObjectLimitType",
-                "MouseOpeLimit",
-                "MoveMode",
+                "Vignetting_DX11",
+                "ShadowVisibilityTypeSelf_DX11",
+                "ShadowVisibilityTypeParty_DX11",
+                "ShadowVisibilityTypeOther_DX11",
+                "ShadowVisibilityTypeEnemy_DX11",
+                "PhysicsTypeSelf_DX11",
+                "PhysicsTypeParty_DX11",
+                "PhysicsTypeOther_DX11",
+                "PhysicsTypeEnemy_DX11",
+                "ReflectionType_DX11",
+                "ParallaxOcclusion_DX11",
+                "BattleEffectSelf",
+                "BattleEffectParty",
+                "BattleEffectOther",
+                "BattleEffectPvPEnemyPc",
+                "EventCameraAutoControl",
+                "NamePlateDispTypeOther",
+                "AutoFaceTargetOnAction",
                 "ObjectBorderingType",
-                "NamePlateDispTypeOther"
+                "MoveMode",
                 };
+            //cfgManager.AddToList("charaLight");
+            cfgManager.AddToList(cfgSearchStrings);
+            cfgManager.MapSettings();
+            //cfgManager.DebugSettings();
 
-            MappedSettings.Clear();
-            for (uint cfgId = 0; cfgId < cfgBase.Length; cfgId++)
-            {
-                for (uint i = 0; i < cfgBase[cfgId]->ConfigCount; i++)
-                {
-                    if (cfgBase[cfgId]->ConfigEntry[i].Type == 0)
-                        continue;
-
-                    string name = MemoryHelper.ReadStringNullTerminated(new IntPtr(cfgBase[cfgId]->ConfigEntry[i].Name));
-                    if(cfgSearchStrings.Contains(name))
-                    {
-                        if (!MappedSettings.ContainsKey(name))
-                            MappedSettings[name] = new List<Tuple<uint, uint>>();
-                        MappedSettings[name].Add(new Tuple<uint, uint>(cfgId, cfgBase[cfgId]->ConfigEntry[i].Index));
-                    }
-                }
-            }
         }
 
         public void Start()
@@ -277,28 +289,13 @@ namespace ConvenientGraphics
             SetSettings(currentGroup, cfg.GraphicsSettings[currentGroup]);
         }
 
-
-        private void SetSettingsValue(List<Tuple<uint, uint>> list, uint value)
-        {
-            foreach (Tuple<uint, uint> item in list)
-                cfgBase[item.Item1]->ConfigEntry[item.Item2].SetValueUInt(value);
-        }
-
-        private uint GetSettingsValue(List<Tuple<uint, uint>> list, int index)
-        {
-            if (index >= list.Count)
-                return 0;
-            return cfgBase[list[index].Item1]->ConfigEntry[list[index].Item2].Value.UInt;
-        }
-
         private void SetSettings(GroupType currentGroup, Dictionary<string, uint> settingOptions)
         {
             PrintEcho($"Setting {currentGroup}");
             foreach (KeyValuePair<string, uint> option in settingOptions)
             {
                 if(!option.Key.StartsWith("_"))
-                    if(MappedSettings.ContainsKey(option.Key))
-                        SetSettingsValue(MappedSettings[option.Key], option.Value);
+                    cfgManager.SetSettingsValue(option.Key, option.Value);
             }
 
             //----
