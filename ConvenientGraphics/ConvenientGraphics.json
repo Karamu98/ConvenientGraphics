@@ -2,7 +2,7 @@
     "Author": "Marulu, StreetRat",
     "Name": "ConvenientGraphics",
     "InternalName": "ConvenientGraphics",
-    "AssemblyVersion": "0.0.0.5",
+    "AssemblyVersion": "0.0.0.6",
     "Punchline": "Changing Graphics and other settings on the fly",
     "Description": "",
     "ApplicableVersion": "any",
@@ -10,5 +10,5 @@
     "Tags": [
         "utility"
     ],
-    "AcceptsFeedback": true
+    "AcceptsFeedback": false
 }

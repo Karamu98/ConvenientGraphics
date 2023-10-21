@@ -66,7 +66,6 @@ namespace MemoryManager
             }
         }
 
-
         private void SetItemActive(int offset, ushort shift, ushort mask)
         {
             if (mmvAccessor != null)

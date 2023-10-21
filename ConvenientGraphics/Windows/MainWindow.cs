@@ -77,7 +77,6 @@ public class MainWindow : Window, IDisposable
             uint BattleEffectOther = self.cfg.GraphicsSettings[curGroup]["BattleEffectOther"];
             bool EventCameraAutoControl = Convert.ToBoolean(self.cfg.GraphicsSettings[curGroup]["EventCameraAutoControl"]);
             uint ShowNameplates = self.cfg.GraphicsSettings[curGroup]["NamePlateDispTypeOther"];
-            bool AutoFaceTargetOnAction = Convert.ToBoolean(self.cfg.GraphicsSettings[curGroup]["AutoFaceTargetOnAction"]);
             bool ObjectBorderingType = Convert.ToBoolean(self.cfg.GraphicsSettings[curGroup]["ObjectBorderingType"]);
             uint MoveMode = self.cfg.GraphicsSettings[curGroup]["MoveMode"];
             bool UseChillframes = Convert.ToBoolean(self.cfg.GraphicsSettings[curGroup]["_UseChillframes"]);

@@ -1,6 +1,5 @@
 ﻿using Dalamud.Configuration;
 using Dalamud.Plugin;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using System;
 using System.Collections.Generic;
 
@@ -30,14 +29,55 @@ namespace ConvenientGraphics
         {
             if (Version != UpdateValue)
             {
-                SetDefaults();
+                SaveCurrent();
                 Version = UpdateValue;
+            }
+        }
+
+        public void SaveCurrent()
+        {
+            Dictionary<GroupType, Dictionary<string, uint>> tmpGraphicsSettings = new Dictionary<GroupType, Dictionary<string, uint>>();
+            if (GraphicsSettings.Count == 0)
+            {
+                ResetDefaults();
+            }
+            else
+            {
+                //----
+                // Saves the current list of settings
+                //----
+                foreach(KeyValuePair<GroupType, Dictionary<string, uint>> groups in GraphicsSettings)
+                {
+                    tmpGraphicsSettings[groups.Key] = new Dictionary<string, uint>();
+                    foreach (KeyValuePair<string, uint> item in groups.Value)
+                        tmpGraphicsSettings[groups.Key][item.Key] = item.Value;
+                }
+
+                //----
+                // Resets all defaults so we have a clean list to deal with, removing any
+                // unused values while setting new defaults
+                //----
+                SetDefaults();
+
+                //----
+                // Goes though all the defaults and if the key exists
+                // sets it from the saved value
+                //----
+                foreach (KeyValuePair<GroupType, Dictionary<string, uint>> groups in GraphicsSettings)
+                    foreach (KeyValuePair<string, uint> item in groups.Value)
+                        if (tmpGraphicsSettings[groups.Key].ContainsKey(item.Key))
+                            GraphicsSettings[groups.Key][item.Key] = tmpGraphicsSettings[groups.Key][item.Key];
                 Save();
             }
         }
 
+        public void ResetDefaults()
+        {
+            SetDefaults();
+            Save();
+        }
 
-        public void SetDefaults()
+        private void SetDefaults()
         {
             GraphicsSettings.Clear();
 
@@ -60,7 +100,6 @@ namespace ConvenientGraphics
             GraphicsSettings[GroupType.Standard]["BattleEffectOther"] = 2;
             GraphicsSettings[GroupType.Standard]["EventCameraAutoControl"] = 0;
             GraphicsSettings[GroupType.Standard]["NamePlateDispTypeOther"] = 2;
-            GraphicsSettings[GroupType.Standard]["AutoFaceTargetOnAction"] = 0;
             GraphicsSettings[GroupType.Standard]["ObjectBorderingType"] = 0;
             GraphicsSettings[GroupType.Standard]["MoveMode"] = 0;
             GraphicsSettings[GroupType.Standard]["_UseChillframes"] = 1;
@@ -85,7 +124,6 @@ namespace ConvenientGraphics
             GraphicsSettings[GroupType.InDuty]["BattleEffectOther"] = 2;
             GraphicsSettings[GroupType.InDuty]["EventCameraAutoControl"] = 0;
             GraphicsSettings[GroupType.InDuty]["NamePlateDispTypeOther"] = 2;
-            GraphicsSettings[GroupType.InDuty]["AutoFaceTargetOnAction"] = 0;
             GraphicsSettings[GroupType.InDuty]["ObjectBorderingType"] = 0;
             GraphicsSettings[GroupType.InDuty]["MoveMode"] = 0;
             GraphicsSettings[GroupType.InDuty]["_UseChillframes"] = 1;
@@ -110,7 +148,6 @@ namespace ConvenientGraphics
             GraphicsSettings[GroupType.VR]["BattleEffectOther"] = 2;
             GraphicsSettings[GroupType.VR]["EventCameraAutoControl"] = 0;
             GraphicsSettings[GroupType.VR]["NamePlateDispTypeOther"] = 2;
-            GraphicsSettings[GroupType.VR]["AutoFaceTargetOnAction"] = 0;
             GraphicsSettings[GroupType.VR]["ObjectBorderingType"] = 1;
             GraphicsSettings[GroupType.VR]["MoveMode"] = 1;
             GraphicsSettings[GroupType.VR]["_UseChillframes"] = 0;
@@ -135,7 +172,6 @@ namespace ConvenientGraphics
             GraphicsSettings[GroupType.VRInCapital]["EventCameraAutoControl"] = 0;
             GraphicsSettings[GroupType.VRInCapital]["DisplayObjectLimitType"] = 2;
             GraphicsSettings[GroupType.VRInCapital]["NamePlateDispTypeOther"] = 2;
-            GraphicsSettings[GroupType.VRInCapital]["AutoFaceTargetOnAction"] = 0;
             GraphicsSettings[GroupType.VRInCapital]["ObjectBorderingType"] = 1;
             GraphicsSettings[GroupType.VRInCapital]["MoveMode"] = 1;
             GraphicsSettings[GroupType.VRInCapital]["_UseChillframes"] = 0;

@@ -6,15 +6,15 @@ using Dalamud.Plugin.Services;
 using Dalamud.Interface.Windowing;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using XivCommon;
 
 using ConvenientGraphics.Windows;
 using MemoryManager;
 using SettingsManager;
-using System.Text.RegularExpressions;
+
 
 namespace ConvenientGraphics
 {
@@ -62,7 +62,7 @@ namespace ConvenientGraphics
         private bool isEnabled = false;
         private bool isXIVRActive = false;
         private bool isXIVRCapital = false;
-        private int cfgVersionValue = 6;
+        private int cfgVersionValue = 7;
         private bool isVertMovement = false;
         private int timeOutCount = 0;
         private GroupType prevGroup = GroupType.Standard;
@@ -74,6 +74,7 @@ namespace ConvenientGraphics
             cfg = PluginInterface!.GetPluginConfig() as Configuration ?? new Configuration();
             cfg.Initialize(PluginInterface!);
             cfg.CheckVersion(cfgVersionValue);
+            //cfg.SaveCurrent();
 
             chatHandler = new XivCommonBase(PluginInterface);
             MainWindow = new MainWindow(this);
@@ -82,7 +83,7 @@ namespace ConvenientGraphics
             CommandManager!.RemoveHandler(CommandName);
             CommandManager!.AddHandler(CommandName, new CommandInfo(OnCommand)
             {
-                HelpMessage = "Help stuff here"
+                HelpMessage = "Opens the settings window"
             });
 
             ClientState!.Login += OnLogin;
@@ -129,12 +130,17 @@ namespace ConvenientGraphics
 
             switch (subcommand.ToLower())
             {
-                case "save":
+                case "reset":
+                    {
+                        cfg.ResetDefaults();
+                        break;
+                    }
+                case "copyConfig":
                     {
                         cfgManager.Save();
                         break;
                     }
-                case "compare":
+                case "compareConfig":
                     {
                         cfgManager.Save(true);
                         break;
