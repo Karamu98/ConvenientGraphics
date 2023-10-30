@@ -98,6 +98,7 @@ namespace ConvenientGraphics
             GraphicsSettings[GroupType.Standard]["ParallaxOcclusion_DX11"] = 1;
             GraphicsSettings[GroupType.Standard]["BattleEffectParty"] = 1;
             GraphicsSettings[GroupType.Standard]["BattleEffectOther"] = 2;
+            GraphicsSettings[GroupType.Standard]["FPSCameraInterpolationType"] = 2;
             GraphicsSettings[GroupType.Standard]["EventCameraAutoControl"] = 0;
             GraphicsSettings[GroupType.Standard]["NamePlateDispTypeOther"] = 2;
             GraphicsSettings[GroupType.Standard]["ObjectBorderingType"] = 0;
@@ -122,6 +123,7 @@ namespace ConvenientGraphics
             GraphicsSettings[GroupType.InDuty]["ParallaxOcclusion_DX11"] = 0;
             GraphicsSettings[GroupType.InDuty]["BattleEffectParty"] = 1;
             GraphicsSettings[GroupType.InDuty]["BattleEffectOther"] = 2;
+            GraphicsSettings[GroupType.InDuty]["FPSCameraInterpolationType"] = 2;
             GraphicsSettings[GroupType.InDuty]["EventCameraAutoControl"] = 0;
             GraphicsSettings[GroupType.InDuty]["NamePlateDispTypeOther"] = 2;
             GraphicsSettings[GroupType.InDuty]["ObjectBorderingType"] = 0;
@@ -146,6 +148,7 @@ namespace ConvenientGraphics
             GraphicsSettings[GroupType.VR]["ParallaxOcclusion_DX11"] = 0;
             GraphicsSettings[GroupType.VR]["BattleEffectParty"] = 1;
             GraphicsSettings[GroupType.VR]["BattleEffectOther"] = 2;
+            GraphicsSettings[GroupType.VR]["FPSCameraInterpolationType"] = 2;
             GraphicsSettings[GroupType.VR]["EventCameraAutoControl"] = 0;
             GraphicsSettings[GroupType.VR]["NamePlateDispTypeOther"] = 2;
             GraphicsSettings[GroupType.VR]["ObjectBorderingType"] = 1;
@@ -169,6 +172,7 @@ namespace ConvenientGraphics
             GraphicsSettings[GroupType.VRInCapital]["ParallaxOcclusion_DX11"] = 0;
             GraphicsSettings[GroupType.VRInCapital]["BattleEffectParty"] = 1;
             GraphicsSettings[GroupType.VRInCapital]["BattleEffectOther"] = 2;
+            GraphicsSettings[GroupType.VRInCapital]["FPSCameraInterpolationType"] = 2;
             GraphicsSettings[GroupType.VRInCapital]["EventCameraAutoControl"] = 0;
             GraphicsSettings[GroupType.VRInCapital]["DisplayObjectLimitType"] = 2;
             GraphicsSettings[GroupType.VRInCapital]["NamePlateDispTypeOther"] = 2;

@@ -62,7 +62,7 @@ namespace ConvenientGraphics
         private bool isEnabled = false;
         private bool isXIVRActive = false;
         private bool isXIVRCapital = false;
-        private int cfgVersionValue = 7;
+        private int cfgVersionValue = 8;
         private bool isVertMovement = false;
         private int timeOutCount = 0;
         private GroupType prevGroup = GroupType.Standard;
@@ -135,12 +135,12 @@ namespace ConvenientGraphics
                         cfg.ResetDefaults();
                         break;
                     }
-                case "copyConfig":
+                case "copyconfig":
                     {
                         cfgManager.Save();
                         break;
                     }
-                case "compareConfig":
+                case "compareconfig":
                     {
                         cfgManager.Save(true);
                         break;
@@ -260,6 +260,7 @@ namespace ConvenientGraphics
                 "BattleEffectParty",
                 "BattleEffectOther",
                 "BattleEffectPvPEnemyPc",
+                "FPSCameraInterpolationType",
                 "EventCameraAutoControl",
                 "NamePlateDispTypeOther",
                 "AutoFaceTargetOnAction",

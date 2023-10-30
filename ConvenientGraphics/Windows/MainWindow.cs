@@ -75,6 +75,7 @@ public class MainWindow : Window, IDisposable
             uint ParallaxOcclusion_DX11 = self.cfg.GraphicsSettings[curGroup]["ParallaxOcclusion_DX11"];
             uint BattleEffectParty = self.cfg.GraphicsSettings[curGroup]["BattleEffectParty"];
             uint BattleEffectOther = self.cfg.GraphicsSettings[curGroup]["BattleEffectOther"];
+            uint FPSCameraInterpolationType = self.cfg.GraphicsSettings[curGroup]["FPSCameraInterpolationType"];
             bool EventCameraAutoControl = Convert.ToBoolean(self.cfg.GraphicsSettings[curGroup]["EventCameraAutoControl"]);
             uint ShowNameplates = self.cfg.GraphicsSettings[curGroup]["NamePlateDispTypeOther"];
             bool ObjectBorderingType = Convert.ToBoolean(self.cfg.GraphicsSettings[curGroup]["ObjectBorderingType"]);
@@ -95,6 +96,7 @@ public class MainWindow : Window, IDisposable
             string[] optionsBattleEffect = { "Show All", "Show Limited", "Show None" };
             string[] optionsShadowVisibilityType = { "Hide", "Display" };
             string[] optionsPhysicsType = { "Off", "Simple", "Full" };
+            string[] optionsFPSCameraInterpolationType = { "Only When Moving", "Always", "Never" };
 
             int optionWidth = 200;
 
@@ -172,6 +174,14 @@ public class MainWindow : Window, IDisposable
                 setCombo(optionsBattleEffect, false, ref BattleEffectOther);
                 ImGui.EndCombo();
                 self.cfg.GraphicsSettings[curGroup]["BattleEffectOther"] = BattleEffectOther;
+            }
+
+            ImGui.Text("1st Person Camera Auto Adjust"); ImGui.SameLine(); ImGui.SetNextItemWidth(optionWidth);
+            if (ImGui.BeginCombo("##FPSCameraInterpolationType" + curGroup, optionsFPSCameraInterpolationType[FPSCameraInterpolationType]))
+            {
+                setCombo(optionsFPSCameraInterpolationType, false, ref FPSCameraInterpolationType);
+                ImGui.EndCombo();
+                self.cfg.GraphicsSettings[curGroup]["FPSCameraInterpolationType"] = FPSCameraInterpolationType;
             }
 
             ImGui.Text("Look at target when speaking"); ImGui.SameLine(); ImGui.SetNextItemWidth(optionWidth);
