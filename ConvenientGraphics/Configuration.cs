@@ -13,16 +13,16 @@ namespace ConvenientGraphics
 
         // the below exist just to make saving less cumbersome
         [NonSerialized]
-        private DalamudPluginInterface? PluginInterface;
+        private IDalamudPluginInterface? iPluginInterface;
 
-        public void Initialize(DalamudPluginInterface pluginInterface)
+        public void Initialize(IDalamudPluginInterface pluginInterface)
         {
-            this.PluginInterface = pluginInterface;
+            this.iPluginInterface = pluginInterface;
         }
 
         public void Save()
         {
-            this.PluginInterface!.SavePluginConfig(this);
+            this.iPluginInterface!.SavePluginConfig(this);
         }
 
         public void CheckVersion(int UpdateValue)
@@ -79,107 +79,51 @@ namespace ConvenientGraphics
 
         private void SetDefaults()
         {
+            Dictionary<string, Tuple<uint, uint, uint, uint>> DefaultSettings = new Dictionary<string, Tuple<uint, uint, uint, uint>>();
+            DefaultSettings["Fps"]                              = new Tuple<uint, uint, uint, uint>(1, 1, 0, 0);
+            DefaultSettings["MouseOpeLimit"]                    = new Tuple<uint, uint, uint, uint>(0, 0, 1, 1);
+            DefaultSettings["Gamma"]                            = new Tuple<uint, uint, uint, uint>(30, 0, 0, 0);
+            DefaultSettings["CharaLight"]                       = new Tuple<uint, uint, uint, uint>(30, 20, 20, 20);
+            DefaultSettings["DisplayObjectLimitType"]           = new Tuple<uint, uint, uint, uint>(0, 4, 3, 2);
+            DefaultSettings["TextureAnisotropicQuality_DX11"]   = new Tuple<uint, uint, uint, uint>(2, 0, 0, 0);
+            DefaultSettings["SSAO_DX11"]                        = new Tuple<uint, uint, uint, uint>(5, 0, 0, 0);
+            DefaultSettings["Vignetting_DX11"]                  = new Tuple<uint, uint, uint, uint>(0, 0, 0, 0);
+            DefaultSettings["GrassQuality_DX11"]                = new Tuple<uint, uint, uint, uint>(3, 2, 0, 0);
+            DefaultSettings["ShadowLOD_DX11"]                   = new Tuple<uint, uint, uint, uint>(0, 0, 1, 1);
+            DefaultSettings["ShadowVisibilityTypeOther_DX11"]   = new Tuple<uint, uint, uint, uint>(1, 0, 0, 0);
+            DefaultSettings["ShadowVisibilityTypeEnemy_DX11"]   = new Tuple<uint, uint, uint, uint>(1, 1, 1, 0);
+            DefaultSettings["PhysicsTypeOther_DX11"]            = new Tuple<uint, uint, uint, uint>(2, 0, 0, 0);
+            DefaultSettings["PhysicsTypeEnemy_DX11"]            = new Tuple<uint, uint, uint, uint>(2, 1, 1, 0);
+            DefaultSettings["ReflectionType_DX11"]              = new Tuple<uint, uint, uint, uint>(3, 0, 0, 0);
+            DefaultSettings["ParallaxOcclusion_DX11"]           = new Tuple<uint, uint, uint, uint>(1, 0, 0, 0);
+            DefaultSettings["DynamicRezoThreshold"]             = new Tuple<uint, uint, uint, uint>(0, 0, 1, 1);
+            DefaultSettings["GraphicsRezoScale"]                = new Tuple<uint, uint, uint, uint>(100, 100, 100, 100);
+            DefaultSettings["GraphicsRezoUpscaleType"]          = new Tuple<uint, uint, uint, uint>(1, 1, 0, 0);
+            DefaultSettings["ShadowBgLOD"]                      = new Tuple<uint, uint, uint, uint>(0, 0, 1, 1);
+            DefaultSettings["DynamicRezoType"]                  = new Tuple<uint, uint, uint, uint>(0, 0, 0, 0);
+            DefaultSettings["BattleEffectParty"]                = new Tuple<uint, uint, uint, uint>(1, 1, 1, 1);
+            DefaultSettings["BattleEffectOther"]                = new Tuple<uint, uint, uint, uint>(2, 2, 2, 2);
+            DefaultSettings["FPSCameraInterpolationType"]       = new Tuple<uint, uint, uint, uint>(2, 2, 2, 2);
+            DefaultSettings["EventCameraAutoControl"]           = new Tuple<uint, uint, uint, uint>(0, 0, 0, 0);
+            DefaultSettings["NamePlateDispTypeOther"]           = new Tuple<uint, uint, uint, uint>(2, 2, 2, 2);
+            DefaultSettings["ObjectBorderingType"]              = new Tuple<uint, uint, uint, uint>(0, 0, 1, 1);
+            DefaultSettings["MoveMode"]                         = new Tuple<uint, uint, uint, uint>(0, 0, 1, 1);
+            DefaultSettings["_UseChillframes"]                  = new Tuple<uint, uint, uint, uint>(1, 1, 0, 0);
+            DefaultSettings["_SetHudLayout"]                    = new Tuple<uint, uint, uint, uint>(0, 0, 0, 0);
+
             GraphicsSettings.Clear();
-
             GraphicsSettings[GroupType.Standard] = new Dictionary<string, uint>();
-            GraphicsSettings[GroupType.Standard]["MouseOpeLimit"] = 0;
-            GraphicsSettings[GroupType.Standard]["Gamma"] = 30;
-            GraphicsSettings[GroupType.Standard]["CharaLight"] = 30;
-            GraphicsSettings[GroupType.Standard]["DisplayObjectLimitType"] = 0;
-            GraphicsSettings[GroupType.Standard]["TextureFilterQuality_DX11"] = 2;
-            GraphicsSettings[GroupType.Standard]["TextureAnisotropicQuality_DX11"] = 2;
-            GraphicsSettings[GroupType.Standard]["SSAO_DX11"] = 4;
-            GraphicsSettings[GroupType.Standard]["Vignetting_DX11"] = 0;
-            GraphicsSettings[GroupType.Standard]["ShadowVisibilityTypeOther_DX11"] = 1;
-            GraphicsSettings[GroupType.Standard]["ShadowVisibilityTypeEnemy_DX11"] = 1;
-            GraphicsSettings[GroupType.Standard]["PhysicsTypeOther_DX11"] = 2;
-            GraphicsSettings[GroupType.Standard]["PhysicsTypeEnemy_DX11"] = 2;
-            GraphicsSettings[GroupType.Standard]["ReflectionType_DX11"] = 3;
-            GraphicsSettings[GroupType.Standard]["ParallaxOcclusion_DX11"] = 1;
-            GraphicsSettings[GroupType.Standard]["BattleEffectParty"] = 1;
-            GraphicsSettings[GroupType.Standard]["BattleEffectOther"] = 2;
-            GraphicsSettings[GroupType.Standard]["FPSCameraInterpolationType"] = 2;
-            GraphicsSettings[GroupType.Standard]["EventCameraAutoControl"] = 0;
-            GraphicsSettings[GroupType.Standard]["NamePlateDispTypeOther"] = 2;
-            GraphicsSettings[GroupType.Standard]["ObjectBorderingType"] = 0;
-            GraphicsSettings[GroupType.Standard]["MoveMode"] = 0;
-            GraphicsSettings[GroupType.Standard]["_UseChillframes"] = 1;
-            GraphicsSettings[GroupType.Standard]["_SetHudLayout"] = 0;
-
             GraphicsSettings[GroupType.InDuty] = new Dictionary<string, uint>();
-            GraphicsSettings[GroupType.InDuty]["MouseOpeLimit"] = 0;
-            GraphicsSettings[GroupType.InDuty]["Gamma"] = 0;
-            GraphicsSettings[GroupType.InDuty]["CharaLight"] = 20;
-            GraphicsSettings[GroupType.InDuty]["DisplayObjectLimitType"] = 4;
-            GraphicsSettings[GroupType.InDuty]["TextureFilterQuality_DX11"] = 2;
-            GraphicsSettings[GroupType.InDuty]["TextureAnisotropicQuality_DX11"] = 0;
-            GraphicsSettings[GroupType.InDuty]["SSAO_DX11"] = 0;
-            GraphicsSettings[GroupType.InDuty]["Vignetting_DX11"] = 0;
-            GraphicsSettings[GroupType.InDuty]["ShadowVisibilityTypeOther_DX11"] = 0;
-            GraphicsSettings[GroupType.InDuty]["ShadowVisibilityTypeEnemy_DX11"] = 1;
-            GraphicsSettings[GroupType.InDuty]["PhysicsTypeOther_DX11"] = 0;
-            GraphicsSettings[GroupType.InDuty]["PhysicsTypeEnemy_DX11"] = 1;
-            GraphicsSettings[GroupType.InDuty]["ReflectionType_DX11"] = 0;
-            GraphicsSettings[GroupType.InDuty]["ParallaxOcclusion_DX11"] = 0;
-            GraphicsSettings[GroupType.InDuty]["BattleEffectParty"] = 1;
-            GraphicsSettings[GroupType.InDuty]["BattleEffectOther"] = 2;
-            GraphicsSettings[GroupType.InDuty]["FPSCameraInterpolationType"] = 2;
-            GraphicsSettings[GroupType.InDuty]["EventCameraAutoControl"] = 0;
-            GraphicsSettings[GroupType.InDuty]["NamePlateDispTypeOther"] = 2;
-            GraphicsSettings[GroupType.InDuty]["ObjectBorderingType"] = 0;
-            GraphicsSettings[GroupType.InDuty]["MoveMode"] = 0;
-            GraphicsSettings[GroupType.InDuty]["_UseChillframes"] = 1;
-            GraphicsSettings[GroupType.InDuty]["_SetHudLayout"] = 0;
-
             GraphicsSettings[GroupType.VR] = new Dictionary<string, uint>();
-            GraphicsSettings[GroupType.VR]["MouseOpeLimit"] = 1;
-            GraphicsSettings[GroupType.VR]["Gamma"] = 0;
-            GraphicsSettings[GroupType.VR]["CharaLight"] = 20;
-            GraphicsSettings[GroupType.VR]["DisplayObjectLimitType"] = 3;
-            GraphicsSettings[GroupType.VR]["TextureFilterQuality_DX11"] = 2;
-            GraphicsSettings[GroupType.VR]["TextureAnisotropicQuality_DX11"] = 0;
-            GraphicsSettings[GroupType.VR]["SSAO_DX11"] = 0;
-            GraphicsSettings[GroupType.VR]["Vignetting_DX11"] = 0;
-            GraphicsSettings[GroupType.VR]["ShadowVisibilityTypeOther_DX11"] = 0;
-            GraphicsSettings[GroupType.VR]["ShadowVisibilityTypeEnemy_DX11"] = 1;
-            GraphicsSettings[GroupType.VR]["PhysicsTypeOther_DX11"] = 0;
-            GraphicsSettings[GroupType.VR]["PhysicsTypeEnemy_DX11"] = 1;
-            GraphicsSettings[GroupType.VR]["ReflectionType_DX11"] = 0;
-            GraphicsSettings[GroupType.VR]["ParallaxOcclusion_DX11"] = 0;
-            GraphicsSettings[GroupType.VR]["BattleEffectParty"] = 1;
-            GraphicsSettings[GroupType.VR]["BattleEffectOther"] = 2;
-            GraphicsSettings[GroupType.VR]["FPSCameraInterpolationType"] = 2;
-            GraphicsSettings[GroupType.VR]["EventCameraAutoControl"] = 0;
-            GraphicsSettings[GroupType.VR]["NamePlateDispTypeOther"] = 2;
-            GraphicsSettings[GroupType.VR]["ObjectBorderingType"] = 1;
-            GraphicsSettings[GroupType.VR]["MoveMode"] = 1;
-            GraphicsSettings[GroupType.VR]["_UseChillframes"] = 0;
-            GraphicsSettings[GroupType.VR]["_SetHudLayout"] = 0;
-
             GraphicsSettings[GroupType.VRInCapital] = new Dictionary<string, uint>();
-            GraphicsSettings[GroupType.VRInCapital]["MouseOpeLimit"] = 1;
-            GraphicsSettings[GroupType.VRInCapital]["Gamma"] = 0;
-            GraphicsSettings[GroupType.VRInCapital]["CharaLight"] = 20;
-            GraphicsSettings[GroupType.VRInCapital]["TextureFilterQuality_DX11"] = 2;
-            GraphicsSettings[GroupType.VRInCapital]["TextureAnisotropicQuality_DX11"] = 0;
-            GraphicsSettings[GroupType.VRInCapital]["SSAO_DX11"] = 0;
-            GraphicsSettings[GroupType.VRInCapital]["Vignetting_DX11"] = 0;
-            GraphicsSettings[GroupType.VRInCapital]["ShadowVisibilityTypeOther_DX11"] = 0;
-            GraphicsSettings[GroupType.VRInCapital]["ShadowVisibilityTypeEnemy_DX11"] = 0;
-            GraphicsSettings[GroupType.VRInCapital]["PhysicsTypeOther_DX11"] = 0;
-            GraphicsSettings[GroupType.VRInCapital]["PhysicsTypeEnemy_DX11"] = 0;
-            GraphicsSettings[GroupType.VRInCapital]["ReflectionType_DX11"] = 0;
-            GraphicsSettings[GroupType.VRInCapital]["ParallaxOcclusion_DX11"] = 0;
-            GraphicsSettings[GroupType.VRInCapital]["BattleEffectParty"] = 1;
-            GraphicsSettings[GroupType.VRInCapital]["BattleEffectOther"] = 2;
-            GraphicsSettings[GroupType.VRInCapital]["FPSCameraInterpolationType"] = 2;
-            GraphicsSettings[GroupType.VRInCapital]["EventCameraAutoControl"] = 0;
-            GraphicsSettings[GroupType.VRInCapital]["DisplayObjectLimitType"] = 2;
-            GraphicsSettings[GroupType.VRInCapital]["NamePlateDispTypeOther"] = 2;
-            GraphicsSettings[GroupType.VRInCapital]["ObjectBorderingType"] = 1;
-            GraphicsSettings[GroupType.VRInCapital]["MoveMode"] = 1;
-            GraphicsSettings[GroupType.VRInCapital]["_UseChillframes"] = 0;
-            GraphicsSettings[GroupType.VRInCapital]["_SetHudLayout"] = 0;
+
+            foreach (KeyValuePair<string, Tuple<uint, uint, uint, uint>> configOption in DefaultSettings)
+            {
+                GraphicsSettings[GroupType.Standard][configOption.Key] = configOption.Value.Item1;
+                GraphicsSettings[GroupType.InDuty][configOption.Key] = configOption.Value.Item2;
+                GraphicsSettings[GroupType.VR][configOption.Key] = configOption.Value.Item3;
+                GraphicsSettings[GroupType.VRInCapital][configOption.Key] = configOption.Value.Item4;
+            }
         }
     }
 }

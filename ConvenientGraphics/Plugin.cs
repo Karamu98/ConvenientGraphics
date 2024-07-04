@@ -9,7 +9,7 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using XivCommon;
+//using XivCommon;
 
 using ConvenientGraphics.Windows;
 using MemoryManager;
@@ -20,7 +20,7 @@ namespace ConvenientGraphics
 {
     public unsafe class Plugin : IDalamudPlugin
     {
-        [PluginService] public static DalamudPluginInterface? PluginInterface { get; private set; } = null;
+        [PluginService] public static IDalamudPluginInterface? iPluginInterface { get; private set; } = null;
         [PluginService] public static IFramework? iFramework { get; private set; } = null;
         [PluginService] public static ICommandManager? CommandManager { get; private set; } = null;
         [PluginService] public static IClientState? ClientState { get; private set; } = null;
@@ -29,7 +29,6 @@ namespace ConvenientGraphics
         [PluginService] public static IGameGui? GameGui { get; private set; } = null;
         [PluginService] public static IPluginLog? Log { get; private set; } = null;
 
-        
         public string Name => "ConvenientGraphics";
         private const string CommandName = "/congraph";
 
@@ -39,7 +38,7 @@ namespace ConvenientGraphics
         public Configuration cfg { get; init; }
         public WindowSystem WindowSystem = new("ConvenientGraphics");
         private MainWindow MainWindow { get; init; }
-        private XivCommonBase chatHandler { get; set; }
+        //private XivCommonBase chatHandler { get; set; }
         private Framework* frameworkInstance = Framework.Instance();
 
         private List<ushort> cityZones = new List<ushort>() { 
@@ -54,6 +53,8 @@ namespace ConvenientGraphics
             820, // eulmore
             963, // radzahan
             962, // sharlayan
+            1185, // Tuliyollal
+            1186, // solution9
         };
 
 
@@ -62,7 +63,7 @@ namespace ConvenientGraphics
         private bool isEnabled = false;
         private bool isXIVRActive = false;
         private bool isXIVRCapital = false;
-        private int cfgVersionValue = 8;
+        private int cfgVersionValue = 9;
         private bool isVertMovement = false;
         private int timeOutCount = 0;
         private GroupType prevGroup = GroupType.Standard;
@@ -71,12 +72,12 @@ namespace ConvenientGraphics
 
         public Plugin()
         {
-            cfg = PluginInterface!.GetPluginConfig() as Configuration ?? new Configuration();
-            cfg.Initialize(PluginInterface!);
+            cfg = iPluginInterface!.GetPluginConfig() as Configuration ?? new Configuration();
+            cfg.Initialize(iPluginInterface!);
             cfg.CheckVersion(cfgVersionValue);
             //cfg.SaveCurrent();
 
-            chatHandler = new XivCommonBase(PluginInterface);
+            //chatHandler = new XivCommonBase(iPluginInterface);
             MainWindow = new MainWindow(this);
             WindowSystem.AddWindow(MainWindow);
 
@@ -89,8 +90,9 @@ namespace ConvenientGraphics
             ClientState!.Login += OnLogin;
             ClientState!.Logout += OnLogout;
             iFramework!.Update += Update;
-            PluginInterface!.UiBuilder.Draw += DrawUI;
-            PluginInterface!.UiBuilder.OpenConfigUi += ToggleUI;
+            iPluginInterface!.UiBuilder.Draw += DrawUI;
+            iPluginInterface!.UiBuilder.OpenConfigUi += ToggleUI;
+            iPluginInterface!.UiBuilder.OpenMainUi += ToggleUI;
 
             Initialize();
             Start();
@@ -103,8 +105,9 @@ namespace ConvenientGraphics
             ClientState!.Login -= OnLogin;
             ClientState!.Logout -= OnLogout;
             iFramework!.Update -= Update;
-            PluginInterface!.UiBuilder.Draw -= DrawUI;
-            PluginInterface!.UiBuilder.OpenConfigUi -= ToggleUI;
+            iPluginInterface!.UiBuilder.Draw -= DrawUI;
+            iPluginInterface!.UiBuilder.OpenConfigUi -= ToggleUI;
+            iPluginInterface!.UiBuilder.OpenMainUi -= ToggleUI;
 
             CommandManager!.RemoveHandler(CommandName);
 
@@ -238,16 +241,16 @@ namespace ConvenientGraphics
             currentGroup = GroupType.Standard;
             
             List<string> cfgSearchStrings = new List<string>() {
+                "Fps",
                 "MouseOpeLimit",
                 "Gamma",
                 "CharaLight",
                 "DisplayObjectLimitType",
-                "TextureFilterQuality_DX11",
                 "TextureAnisotropicQuality_DX11",
                 "SSAO_DX11",
                 "Vignetting_DX11",
-                "ShadowVisibilityTypeSelf_DX11",
-                "ShadowVisibilityTypeParty_DX11",
+                "GrassQuality_DX11",
+                "ShadowLOD_DX11",
                 "ShadowVisibilityTypeOther_DX11",
                 "ShadowVisibilityTypeEnemy_DX11",
                 "PhysicsTypeSelf_DX11",
@@ -256,6 +259,11 @@ namespace ConvenientGraphics
                 "PhysicsTypeEnemy_DX11",
                 "ReflectionType_DX11",
                 "ParallaxOcclusion_DX11",
+                "DynamicRezoThreshold",
+                "GraphicsRezoScale",
+                "GraphicsRezoUpscaleType",
+                "ShadowBgLOD",
+                "DynamicRezoType",
                 "BattleEffectSelf",
                 "BattleEffectParty",
                 "BattleEffectOther",
@@ -339,14 +347,14 @@ namespace ConvenientGraphics
         {
             AtkUnitBase* hpBar = (AtkUnitBase*)GameGui!.GetAddonByName("_ParameterWidget", 1);
             AtkUnitBase* minimap = (AtkUnitBase*)GameGui!.GetAddonByName("_NaviMap", 1);
-           
+
             timeOutCount++;
             if(hpBar->IsVisible || minimap->IsVisible)
             {
-                hudLayout = Math.Max(Math.Min(hudLayout, 4), 1);
-                string cleanCmd = chatHandler.Functions.Chat.SanitiseText($"/hudlayout {hudLayout}");
-                chatHandler.Functions.Chat.SendMessage(cleanCmd);
                 timer.Enabled = false;
+                hudLayout = Math.Max(Math.Min(hudLayout, 4), 1);
+                //string cleanCmd = chatHandler.Functions.Chat.SanitiseText($"/hudlayout {hudLayout}");
+                //chatHandler.Functions.Chat.SendMessage(cleanCmd);
             }
             else if (timeOutCount > 20)
                 timer.Enabled = false;

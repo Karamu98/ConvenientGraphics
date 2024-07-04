@@ -1,9 +1,7 @@
-﻿
-using ConvenientGraphics;
+﻿using ConvenientGraphics;
 using Dalamud.Memory;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Common.Configuration;
-using Lumina.Excel.GeneratedSheets;
 using System;
 using System.Collections.Generic;
 
@@ -17,14 +15,14 @@ namespace SettingsManager
         private Dictionary<string, List<Tuple<uint, uint>>> MappedSettings = new Dictionary<string, List<Tuple<uint, uint>>>();
         private List<string> cfgSearchStrings = new List<string>();
 
-        private Dictionary<string, uint> savedSettings = new Dictionary<string, uint>();
+        private Dictionary<string, Dictionary<uint, KeyValuePair<uint, ConfigValue>>> savedSettings = new Dictionary<string, Dictionary<uint, KeyValuePair<uint, ConfigValue>>>();
 
         public ConfigManager()
         {
-            cfgBase[0] = &(frameworkInstance->SystemConfig.CommonSystemConfig.ConfigBase);
-            cfgBase[1] = &(frameworkInstance->SystemConfig.CommonSystemConfig.UiConfig);
-            cfgBase[2] = &(frameworkInstance->SystemConfig.CommonSystemConfig.UiControlConfig);
-            cfgBase[3] = &(frameworkInstance->SystemConfig.CommonSystemConfig.UiControlGamepadConfig);
+            cfgBase[0] = &(frameworkInstance->SystemConfig.SystemConfigBase.ConfigBase);
+            cfgBase[1] = &(frameworkInstance->SystemConfig.SystemConfigBase.UiConfig);
+            cfgBase[2] = &(frameworkInstance->SystemConfig.SystemConfigBase.UiControlConfig);
+            cfgBase[3] = &(frameworkInstance->SystemConfig.SystemConfigBase.UiControlGamepadConfig);
 
             ClearList();
         }
@@ -92,19 +90,27 @@ namespace SettingsManager
 
         public void DebugSettings(bool printAll = false)
         {
-            for (uint cfgId = 0; cfgId < cfgBase.Length; cfgId++)
-            {
-                for (uint i = 0; i < cfgBase[cfgId]->ConfigCount; i++)
-                {
-                    if (cfgBase[cfgId]->ConfigEntry[i].Type == 0)
-                        continue;
+            Save(false);
 
-                    string name = MemoryHelper.ReadStringNullTerminated(new IntPtr(cfgBase[cfgId]->ConfigEntry[i].Name));
+            foreach (KeyValuePair<string, Dictionary<uint, KeyValuePair<uint, ConfigValue>>> itemByName in savedSettings)
+            {
+                foreach (KeyValuePair<uint, KeyValuePair<uint, ConfigValue>> cfgEntry in itemByName.Value)
+                {
+                    string name = itemByName.Key;
+                    uint cfgId = cfgEntry.Key;
+                    uint i = cfgEntry.Value.Key;
+
                     if (cfgSearchStrings.Contains(name))
-                        Plugin.Log!.Info($"Location: * {i} cfgGroup: {cfgId} cfgOffset: {cfgBase[cfgId]->ConfigEntry[i].Index} name: {name} value: {cfgBase[cfgId]->ConfigEntry[i].Value.UInt}");
-                    else if(printAll)
-                        Plugin.Log!.Info($"Location:   {i} cfgGroup: {cfgId} cfgOffset: {cfgBase[cfgId]->ConfigEntry[i].Index} name: {name} value: {cfgBase[cfgId]->ConfigEntry[i].Value.UInt}");
+                        Plugin.Log!.Info($"Location: * {cfgId} | {i} name: {name} value: {cfgBase[cfgId]->ConfigEntry[i].Value.UInt}");
+                    else if (printAll)
+                        Plugin.Log!.Info($"Location:   {cfgId} | {i} name: {name} value: {cfgBase[cfgId]->ConfigEntry[i].Value.UInt}");
                 }
+            }
+
+            foreach(string itemName in cfgSearchStrings)
+            {
+                if (!savedSettings.ContainsKey(itemName))
+                    Plugin.Log!.Info($"{itemName} Not found in config options");
             }
         }
 
@@ -112,6 +118,7 @@ namespace SettingsManager
         {
             if (!compare)
             {
+                savedSettings.Clear();
                 for (uint cfgId = 0; cfgId < cfgBase.Length; cfgId++)
                 {
                     for (uint i = 0; i < cfgBase[cfgId]->ConfigCount; i++)
@@ -121,26 +128,19 @@ namespace SettingsManager
 
                         string name = MemoryHelper.ReadStringNullTerminated(new IntPtr(cfgBase[cfgId]->ConfigEntry[i].Name));
                         if (!savedSettings.ContainsKey(name))
-                            savedSettings[name] = cfgBase[cfgId]->ConfigEntry[i].Value.UInt;
+                            savedSettings[name] = new Dictionary<uint, KeyValuePair<uint, ConfigValue>>();
+                        savedSettings[name][cfgId] = new KeyValuePair<uint, ConfigValue>(i, cfgBase[cfgId]->ConfigEntry[i].Value);
                     }
                 }
-                Plugin.Log!.Info($"Settings values saved");
+                Plugin.Log!.Info($"--- Current Settings Saved ---");
             }
             else
             {
-                for (uint cfgId = 0; cfgId < cfgBase.Length; cfgId++)
-                {
-                    for (uint i = 0; i < cfgBase[cfgId]->ConfigCount; i++)
-                    {
-                        if (cfgBase[cfgId]->ConfigEntry[i].Type == 0)
-                            continue;
-
-                        string name = MemoryHelper.ReadStringNullTerminated(new IntPtr(cfgBase[cfgId]->ConfigEntry[i].Name));
-                        if(savedSettings.ContainsKey(name))
-                            if (savedSettings[name] != cfgBase[cfgId]->ConfigEntry[i].Value.UInt)
-                                Plugin.Log!.Info($"{name} | {savedSettings[name]} => {cfgBase[cfgId]->ConfigEntry[i].Value.UInt}");
-                    }
-                }
+                Plugin.Log!.Info($"--- Changed Settings ---");
+                foreach (KeyValuePair<string, Dictionary<uint, KeyValuePair<uint, ConfigValue>>> itemByName in savedSettings)
+                    foreach (KeyValuePair<uint, KeyValuePair<uint, ConfigValue>> cfgEntry in itemByName.Value)
+                        if(cfgEntry.Value.Value.UInt != cfgBase[cfgEntry.Key]->ConfigEntry[cfgEntry.Value.Key].Value.UInt)
+                            Plugin.Log!.Info($"{cfgEntry.Key} | {cfgEntry.Value.Key} -- {itemByName.Key} -- {cfgEntry.Value.Value.UInt} {cfgEntry.Value.Value.Float} | {cfgBase[cfgEntry.Key]->ConfigEntry[cfgEntry.Value.Key].Value.UInt} {cfgBase[cfgEntry.Key]->ConfigEntry[cfgEntry.Value.Key].Value.Float}");
             }
         }
     }

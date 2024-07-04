@@ -2,9 +2,9 @@
     "Author": "Marulu, StreetRat",
     "Name": "ConvenientGraphics",
     "InternalName": "ConvenientGraphics",
-    "AssemblyVersion": "0.0.0.7",
+    "AssemblyVersion": "0.0.1.0",
     "Punchline": "Changing Graphics and other settings on the fly",
-    "Description": "",
+    "Description": "Automatically changes graphics settings",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/ProjectMimer/ConvenientGraphics",
     "Tags": [
